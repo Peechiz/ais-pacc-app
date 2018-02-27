@@ -66,6 +66,7 @@
     "clone": "2.1.1",
     "core-js": "2.4.1",
     "debounce": "1.0.2",
+    "debounce-decorator": "^1.0.6",
     "dropzone": "4.3.0",
     "dygraphs": "2.0.0",
     "fuelux": "3.16.0",
