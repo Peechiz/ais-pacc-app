@@ -62,7 +62,7 @@
                   <form class="form-horizontal">
                     <div class="step-pane active" data-step="1" style="min-height: 373px;">
                       <h3><strong>Step 1 </strong> - Search Patients </h3>
-                      <input type="text" [disabled]="!_startRecording" class="form-control" placeholder="search (e.g Lastname, Phone Number)" [(ngModel)]="form.$searchStr" (keyup)="displayResults()"
+                      <input type="text" [disabled]="!_startRecording" class="form-control" placeholder="search (e.g Lastname, Phone Number)" [(ngModel)]="form.$searchStr" (keyup)="getPatientList()"
                         (blur)="_showsearchResults = false" name="$searchStr">
                       <br><br>
                       <article class="col-sm-12 no-padding" style="margin-top: -3em;">
@@ -714,11 +714,11 @@
                           <input type="text" class="form-control" #wrapCodeFilter name="wrapCodeFilter" [(ngModel)]="searchText" placeholder="filter...">
                         </div>
                         <div class="multiple-select mt-md" *ngIf="_startRecording == true">
-                          <div class="options" *ngFor='let item of _wrap$Codes.$codes | search: "displayName" :searchText | values:"key":true;let i=index' id={{item.configurationId.id}}>
+                          <div class="options" *ngFor='let item of wrapCodes | search: "displayName" :searchText | values:"key":true;let i=index' id={{item.configurationId.id}}>
                             <div class="widget-footer text-left">
                               <span class="line-height-3"> {{item.configurationId.displayName}} </span>
                                <div class="pull-right">
-                                  <button class="btn btn-secondary mt-xs" (click)="toggleMultiSelect($event, item.configurationId.displayName);toggle[i] = !toggle[i];">
+                                  <button class="btn btn-secondary mt-xs" (click)="toggleMultiSelect($event, item.configurationId.id);toggle[i] = !toggle[i];">
                                       <i [ngClass]="toggle[i] ? 'txt-remove': 'txt-add'" aria-hidden="true"
                                       ></i>
                                   </button>
@@ -729,7 +729,7 @@
                         </div>
                       </div>
                       <div class="col-md-6 mt-md">
-                        <div *ngIf="selectedOutCome" [ngClass]="'asc-text-primary two'">{{selectedOutCome}}</div>
+                        <div *ngIf="selectedOutcomes" [ngClass]="'asc-text-primary two'">{{selectedOutcomes}}</div>
                       </div>
                     </div>
 
@@ -745,17 +745,17 @@
                         <thead>
                           <tr>
                             <th>Call Start</th>
-                            <th>Call End</th>
                             <th>Agent</th>
+                            <th>Outcomes</th>
                             <th>Notes</th>
                           </tr>
                         </thead>
                         <tbody *ngIf="callsListLength">
                           <tr *ngFor="let call of calls_list">
-                            <td>{{call.call_start_date_time | date:'medium'}}</td>
-                            <td>{{call.call_stop_date_time | date:'medium'}}</td>
+                            <td>{{call.call_start_date_time | date:'short'}}</td>
                             <td>{{call.call_agent}}</td>
-                            <td>{{call.call_note_id}}</td>
+                            <td>{{call.call_outcome_desc}}</td>
+                            <td>{{call.call_note_text}}</td>
                           </tr>
                         </tbody>
                         <tbody *ngIf="!callsListLength">

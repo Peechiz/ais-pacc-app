@@ -5,6 +5,8 @@ import { FadeInTop } from '../../shared/animations/fade-in-top.decorator';
 import { ModalDirective } from 'ngx-bootstrap/modal';
 import { InboundService } from './inbound-call.service';
 import * as moment from 'moment';
+import Debounce from 'debounce-decorator'
+
 
 import { fadeInTop } from '../shared/animations/router.animations';
 
@@ -71,7 +73,6 @@ export class InboundCallComponent implements OnInit, OnDestroy {
   public _id: any;
   public newData: any;
   public selectedItem: '';
-  // public selectedOutCome: '';
   public patID: number;
   private last_name: string;
   private first_name: string;
@@ -110,15 +111,12 @@ export class InboundCallComponent implements OnInit, OnDestroy {
 
   // public selected: any[] = [];
 
-  selectedOutCome: any = [];
+  private selectedOutcomes: any = [];
 
   sessionID: any;
   csrf: any;
-  // what is this???
-  _wrap$Codes: any = {
-    $codes: {}
-  }
-  demoStyle = 'style1';
+
+  private wrapCodes: any = []
 
   demoShowTabs = false;
 
@@ -138,13 +136,14 @@ export class InboundCallComponent implements OnInit, OnDestroy {
 
   toggleMultiSelect(event, val) {
     event.preventDefault();
-    if (this.selectedOutCome.indexOf(val) === -1) {
-      this.selectedOutCome = [...this.selectedOutCome, val];
+    if (this.selectedOutcomes.indexOf(val) === -1) {
+      this.selectedOutcomes = [...this.selectedOutcomes, val];
+      console.log('selected outcomes',this.selectedOutcomes);
     } else {
-      this.selectedOutCome = this.selectedOutCome.filter(function (elem) {
+      this.selectedOutcomes = this.selectedOutcomes.filter(function (elem) {
         return elem !== val;
       })
-      console.log(this.selectedOutCome);
+      console.log('selected outcomes',this.selectedOutcomes);
     }
   }
 
@@ -157,9 +156,6 @@ export class InboundCallComponent implements OnInit, OnDestroy {
     this.setMessageTimeOut();
     // console.log('user', sessionStorage.getItem('fullUser'))
     // console.log('group:', sessionStorage.getItem('userGroup'))
-  }
-  setStyle(style) {
-    this.demoStyle = style
   }
   ngOnDestroy() {
     console.clear();
@@ -177,7 +173,7 @@ export class InboundCallComponent implements OnInit, OnDestroy {
 
     // check to see if a wrap code has been given...
     // otherwise, throw an error.
-    if (this.selectedOutCome.length){
+    if (this.selectedOutcomes.length){
       this._callWarning = false;
       this._endRecording = true;
       const endTime = new Date();
@@ -187,13 +183,7 @@ export class InboundCallComponent implements OnInit, OnDestroy {
       this.$minutes = Math.floor(diff / 60000);
       this.$seconds = Math.floor(diff / 1000) % 60;
       this._endCall = true;
-      this.postNotes().subscribe(
-        (res: any) => {
-          console.log(res)
-          this.postCalls(res.id);
-          // this.reloadTimeOut();
-        }
-      )
+      this.postCalls();
     } else {
       this._warningMessage = 'Please select an outcome before ending the call.'
       this._callWarning = true;
@@ -227,7 +217,8 @@ export class InboundCallComponent implements OnInit, OnDestroy {
         }
       })
   }
-  public displayResults() {
+  @Debounce(200)
+  public getPatientList() {
     if (this.form.$searchStr.length > 0) {
       this._InboundService.getSearchData(this.form.$searchStr)
         .subscribe(
@@ -248,20 +239,11 @@ export class InboundCallComponent implements OnInit, OnDestroy {
         // console.log(this.applications);
       })
   }
-  // public getCallOutComes() {
-  //   this.patientList = this._InboundService.getCallOutComes()
-  //     .subscribe((response: any) => {
-  //       this.callOutComesData = response;
-  //       if (this.callOutComesData.length > 0) {
-  //         this.selectedOutCome = this.callOutComesData[0]['outcome_desc'];
-  //       }
-  //     })
-  // }
-  public getI3Messages() {
-    this._InboundService.getI3Messages(this.sessionID, this.csrf)
+  public getWrapCodes() {
+    this._InboundService.getWrapCodes(this.sessionID, this.csrf)
       .subscribe(
       (response: any) => {
-        this._wrap$Codes.$codes = response.items;
+        this.wrapCodes = response.items;
       });
   }
   public getStates() {
@@ -270,29 +252,30 @@ export class InboundCallComponent implements OnInit, OnDestroy {
         this.states_list = response;
       })
   }
-  public getCalls() {
-    this.callsList = this._InboundService.getCalls(this.patID)
+  public getCalls() { // TODO get notes for call
+    this._InboundService.getCalls(this.patID)
       .subscribe((response: any) => {
         this.calls_list = response;
-        console.log('Calls List:',this.calls_list)
+        // console.log('Calls List:',this.calls_list)
         this.callsSum = this.calls_list.length;
         if (this.calls_list.length > 0) {
           this.callsListLength = true;
         }
       })
   }
-  public postCalls(notesID) {
+  public postCalls() {
     this._id = this.patID;
+
     const postCallData = {
       'call_start_date_time': moment(this.$startCallTime).format('MM/DD/YYYY, hh:mm:ss a'),
       'call_stop_date_time': moment(this.$endCallTime).format('MM/DD/YYYY, hh:mm:ss a'),
       'call_agent': sessionStorage.getItem('userName'),
-      'call_note_id': notesID
-
+      'call_note_text': this.notes,
+      'call_outcome_desc': JSON.stringify(this.selectedOutcomes)
     }
     console.log(postCallData);
     this._InboundService.postCallsData(postCallData, this._id);
-    this.callBackTimeOut();
+    // this.callBackTimeOut();
   }
   public addPatientList() {
     this.context = null;
@@ -379,7 +362,7 @@ export class InboundCallComponent implements OnInit, OnDestroy {
       this._InboundService.postNewPatient(newData);
     }
     this._addPatients = false;
-    this.displayResults();
+    this.getPatientList();
    // this.saveNotes();
     this.loadMetrics(this.patID);
   }
@@ -395,18 +378,6 @@ export class InboundCallComponent implements OnInit, OnDestroy {
   public showState(state: any) {
     this.selectedState = state;
   }
-  public showOutCome(callOutCome) {
-    this.selectedOutCome = callOutCome;
-  }
-  public postNotes() {
-    // this.childModal.show();
-    const data = {
-      note_text: this.notes,
-      call_agent: sessionStorage.getItem('userName'),
-      patientId: this.individualDetails.id,
-    }
-    return this._InboundService.postNotes(data);
-  }
   public hideChildModal(): void {
     this.childModal.hide();
   }
@@ -421,7 +392,7 @@ export class InboundCallComponent implements OnInit, OnDestroy {
     setTimeout(() => window.location.reload(), 5000)
   }
   public setMessageTimeOut() {
-    setTimeout(() => this.getI3Messages(), 2500)
+    setTimeout(() => this.getWrapCodes(), 2500)
   }
   onWizardComplete(data) {
     alert('oncall loaded!!');

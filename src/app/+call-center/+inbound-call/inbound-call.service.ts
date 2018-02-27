@@ -67,7 +67,8 @@ export class InboundService extends APIServices {
     const options = new RequestOptions({headers: headers});
     return this._http.put(url, editData, options).map(res => res.json()).subscribe();
   }
-  getI3Messages(sessionID, csrf) {
+  getWrapCodes(sessionID, csrf) {
+    // MAYBE this is technically supposed to come from I3 and not from cached JSON ? ¯\_(ツ)_/¯
     // const url = 'https://ciccrm.ascension.org/api/ahwivrtxpla001.ds.sjhs.com/icws/' + sessionID + '/messaging/messages';
     // const url = 'https://ciccrm.ascension.org/api/ahwivrtxpla001.ds.sjhs.com/icws/' + sessionID + '/configuration/wrap-up-codes';
     // const headers = new Headers({ 'Content-Type': 'application/json', 'Accept': 'application/json',
@@ -78,14 +79,5 @@ export class InboundService extends APIServices {
     // return this._http.get(url, options).map((response: any) => { return response.json(); }).catch(this.handleError.bind(this));
     return this._http.get('/assets/api/applications/wrapUpcodes.json').map((response: any) =>
     {return response.json(); }).catch(this.handleError.bind(this));
-  }
-  postNotes(data: any){
-    const url = this.baseUrl + '/Notes';
-    // console.log(url);
-    console.log('saving notes:', data)
-
-    const headers = new Headers({ 'Content-Type': 'application/json', 'Accept': 'application/json' });
-    const options = new RequestOptions({headers: headers});
-    return this._http.post(url, data, options).map(res => res.json());
   }
 }
