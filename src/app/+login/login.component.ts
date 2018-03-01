@@ -103,7 +103,6 @@ export class LoginComponent implements OnInit {
       }
     )
   }
-
   onSubmit() {
     this.form = {
       '__type': 'urn:inin.com:connection:singleSignOnTokenConnectionRequestSettings',
@@ -116,11 +115,14 @@ export class LoginComponent implements OnInit {
        console.log('user maybe?',this.postResponse)
       //  this.updateCredentials(this.postResponse);
        this.sessionId = response.sessionId;
+
        this.userId = response.userID;
        this.userName = response.userDisplayName;
        sessionStorage.setItem('SessionId', this.sessionId);
        sessionStorage.setItem('userName', this.userName);
        sessionStorage.setItem('csrf', response.csrfToken);
+       sessionStorage.setItem('fullUser', JSON.stringify(response))
+       sessionStorage.setItem('userID', this.userId)
        this.getUserAuth2();
        if (this.isAuthenticated = true) {
         this.router.navigate([this.returnUrl]);
