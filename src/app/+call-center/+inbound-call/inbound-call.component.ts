@@ -115,6 +115,7 @@ export class InboundCallComponent implements OnInit, OnDestroy {
 
   sessionID: any;
   csrf: any;
+  private workgroups: any;
 
   private wrapCodes: any = []
 
@@ -152,6 +153,12 @@ export class InboundCallComponent implements OnInit, OnDestroy {
     this.getStates();
     this.getApps();
     this.sessionID = sessionStorage.getItem('SessionId');
+    const csrf = sessionStorage.getItem('csrf')
+    const userID = sessionStorage.getItem('userID')
+    this._InboundService.getUserGroup(this.sessionID, csrf, userID).subscribe((res: any) => {
+      this.workgroups = res.workgroups
+      console.log('user workgroups', this.workgroups)
+    })
     this.csrf = sessionStorage.getItem('csrf');
     this.setMessageTimeOut();
     // console.log('user', sessionStorage.getItem('fullUser'))

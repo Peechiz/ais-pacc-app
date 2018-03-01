@@ -80,4 +80,11 @@ export class InboundService extends APIServices {
     return this._http.get('/assets/api/applications/wrapUpcodes.json').map((response: any) =>
     {return response.json(); }).catch(this.handleError.bind(this));
   }
+  getUserGroup(sessionID, csrf, userID) {
+    const url = 'https://ciccrm.ascension.org/api/ahwivrtxpla001.ds.sjhs.com/icws/' + sessionID + '/configuration/users/' + userID +
+      '?select=*'
+    const headers = new Headers({ 'Content-Type': 'application/json', 'Accept': 'application/json', 'ININ-ICWS-CSRF-TOKEN': csrf});
+    const options = new RequestOptions({headers: headers});
+    return this._http.get(url, options).map(res => res.json())
+  }
 }
