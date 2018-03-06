@@ -191,6 +191,7 @@ export class InboundCallComponent implements OnInit, OnDestroy {
       this.$seconds = Math.floor(diff / 1000) % 60;
       this._endCall = true;
       this.postCalls();
+      this.reloadTimeOut()
     } else {
       this._warningMessage = 'Please select an outcome before ending the call.'
       this._callWarning = true;
@@ -278,7 +279,8 @@ export class InboundCallComponent implements OnInit, OnDestroy {
       'call_stop_date_time': moment(this.$endCallTime).format('MM/DD/YYYY, hh:mm:ss a'),
       'call_agent': sessionStorage.getItem('userName'),
       'call_note_text': this.notes,
-      'call_outcome_desc': JSON.stringify(this.selectedOutcomes)
+      'call_outcome_desc': JSON.stringify(this.selectedOutcomes),
+      'call_group': JSON.stringify(this.workgroups)
     }
     console.log(postCallData);
     this._InboundService.postCallsData(postCallData, this._id);
