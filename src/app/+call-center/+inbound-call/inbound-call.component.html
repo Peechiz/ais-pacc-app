@@ -693,20 +693,6 @@
               <div class="widget-body no-padding">
                 <div class="tab-content padding-10">
                   <div class="tab-pane fade in active" id="callDisposition">
-                    <!-- <span class="asc-text-primary"> <strong> Call Status </strong> </span>
-                    <span class="btn-grp" dropdown>
-                      <button type="button" class="btn btn-secondary dropdown-toggle" dropdownToggle>
-                        {{selectedItem}} <span class="caret"></span>
-                    </button>
-                    <ul class="tabs_dropdown dropdown-menu" role="menu">
-                      <li role="menuitem" *ngFor='let obj of callStatusData'>
-                        <a class="dropdown-item" (click)="showStatus(obj.status)">
-                          {{obj.status}}
-                        </a>
-                      </li>
-                    </ul>
-                    </span>
-                    <hr> -->
                     <div class="row">
                       <div class="col-md-6 mt-md">
                         <span class="asc-text-primary"> <strong> Call Outcomes: </strong> </span>
@@ -738,38 +724,42 @@
                     </div> -->
                   </div>
                   <div class="tab-pane fade" id="callHistory">
-                    <p class="lead" *ngIf="individualDetails">Name: <strong> {{individualDetails.last_name}}, {{individualDetails.first_name}} </strong> | Age: <strong> {{patientAge}} years </strong>
-                    </p>
-                    <div class="table-responsive">
-                      <table class="table table-bordered">
-                        <thead>
-                          <tr>
-                            <th>Call Start</th>
-                            <th>Agent</th>
-                            <th>Outcomes</th>
-                            <th>Notes</th>
-                          </tr>
-                        </thead>
-                        <tbody *ngIf="callsListLength">
-                          <tr *ngFor="let call of calls_list">
-                            <td>{{call.call_start_date_time | date:'short'}}</td>
-                            <td>{{call.call_agent}}</td>
-                            <td>{{call.call_outcome_desc}}</td>
-                            <td>{{call.call_note_text}}</td>
-                          </tr>
-                        </tbody>
-                        <tbody *ngIf="!callsListLength">
-                          <tr>
-                            <td colspan="3">
-                              <h2 class="text-center">
-                                <strong class="text-danger" *ngIf="!individualDetails"> No Records Found </strong>
-                                <strong class="text-primary" *ngIf="individualDetails"> Looks like
-                                  <span class="text-success"> {{individualDetails.first_name | lowercase}} </span> never talked to any agent</strong>
-                              </h2>
-                            </td>
-                          </tr>
-                        </tbody>
-                      </table>
+                    <div *ngIf="individualDetails.first_name">
+                      <p class="lead" *ngIf="individualDetails">Name: <strong> {{individualDetails.last_name}}, {{individualDetails.first_name}} </strong> | Age: <strong> {{patientAge}} years </strong>
+                      </p>
+                      <div class="table-responsive">
+                        <table class="table table-bordered">
+                          <thead>
+                            <tr>
+                              <th>Call Start</th>
+                              <th>Agent</th>
+                              <th>Work Group</th>
+                              <th>Outcomes</th>
+                              <th>Notes</th>
+                            </tr>
+                          </thead>
+                          <tbody *ngIf="callsListLength">
+                            <tr *ngFor="let call of calls_list">
+                              <td>{{call.call_start_date_time | date:'short'}}</td>
+                              <td>{{call.call_agent}}</td>
+                              <td>{{call.call_group}}</td>
+                              <td>{{call.call_outcome_desc}}</td>
+                              <td>{{call.call_note_text}}</td>
+                            </tr>
+                          </tbody>
+                          <tbody *ngIf="!callsListLength">
+                            <tr>
+                              <td colspan="3">
+                                <h2 class="text-center">
+                                  <strong class="text-danger" *ngIf="!individualDetails"> No Records Found </strong>
+                                  <strong class="text-primary" *ngIf="individualDetails"> Looks like
+                                    <span class="text-success"> {{individualDetails.first_name | lowercase}} </span> never talked to any agent</strong>
+                                  </h2>
+                                </td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
                     </div>
                   </div>
                 </div>
@@ -783,8 +773,7 @@
             <div class="bs-example">
               <textarea style="min-height: 163px; width: 100%; padding: 10px" [(ngModel)]="notes" placeholder="Additional notes"></textarea>
               <div class="col-md-12">
-                <button [disabled]="_endCall" class="col-md-2 btn btn-danger mar-sm pull-right" (click)="endCall($event)">End</button>
-                <button type="submit" [disabled]="!_startRecording" class="col-md-2 btn btn-success mar-sm pull-right" (click)="saveNotes()">Save</button>
+                <button type="submit" *ngIf="_startRecording" class="col-md-2 btn btn-danger mar-sm pull-right" (click)="endCall()">End Call</button>
               </div>
             </div>
           </div>
