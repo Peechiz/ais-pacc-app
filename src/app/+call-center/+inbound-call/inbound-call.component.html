@@ -147,7 +147,7 @@
           </sa-widget>
         </article>
         <!-- patient details on load -->
-        <article class="col-sm-6" *ngIf="!_loadmetrics && !_addPatients">
+        <article class="col-sm-6" *ngIf="!individualDetails.id && !_addPatients">
           <sa-widget>
             <div class="row">
               <div class="col-md-6 lead"> Patient Details </div>
@@ -309,10 +309,10 @@
         </article>
         <!-- end of patient details on load -->
         <!-- patient details  -->
-        <article class="col-sm-6" *ngIf="_loadmetrics && !_addPatients">
+        <article class="col-sm-6" *ngIf="individualDetails.id && !_addPatients">
           <sa-widget [editbutton]="false" [deletebutton]="false">
             <div class="row">
-              <div class="col-md-6 lead"> Patient Details (add/edit) </div>
+              <div class="col-md-6 lead"> Patient Details (add/edit)</div>
               <div class="col-md-6">
                 <button class="btn btn-primary pull-right mar-sm" (click)="addPatientList()"><i class="fa fa-plus"></i> Add
                   </button>
@@ -454,10 +454,9 @@
                   <div class="form-group">
                     <label class="col-sm-4 control-label">Preferred Contact:</label>
                     <div class="col-sm-8">
-                      <div class="input-group-btn no-padding">
-                        <button type="button" class="btn btn-default col-md-12" [disabled]="true">
-                          {{individualDetails.preferred_contact_method}} <span class="caret"> </span>
-                        </button>
+                      <div class="input-group">
+                        <span class="input-group-addon"><i class="glyphicon glyphicon-edit"></i></span>
+                        <input class="form-control" type="text" value="{{individualDetails.preferred_contact_method}}" readonly>
                       </div>
                     </div>
                   </div>
@@ -476,7 +475,7 @@
         </article>
         <!-- end of patient details -->
 
-        <!-- add new patient form -->
+        <!-- add / edit patient form -->
         <article class="col-sm-6 animated fadeInUp" *ngIf="_addPatients && !_loadmetrics">
           <sa-widget>
             <header>
@@ -575,7 +574,7 @@
                     <div class="col-sm-8">
                       <div class="input-group">
                         <span class="input-group-addon"><i class="glyphicon glyphicon-envelope"></i></span>
-                        <input class="form-control" type="email" id="email" name="email" [(ngModel)]="email">
+                        <input class="form-control" type="email" id="email" name="email" [(ngModel)]="individualDetails.email">
                       </div>
                     </div>
                   </div>
@@ -586,7 +585,7 @@
                     <div class="col-sm-8">
                       <div class="input-group">
                         <span class="input-group-addon"><i class="glyphicon glyphicon-home"></i></span>
-                        <input class="form-control" type="text" id="address1" name="address1" required="required" [(ngModel)]="address1">
+                        <input class="form-control" type="text" id="address1" name="address1" required="required" [(ngModel)]="individualDetails.address1">
                       </div>
                     </div>
                   </div>
@@ -595,7 +594,7 @@
                     <div class="col-sm-8">
                       <div class="input-group">
                         <span class="input-group-addon"><i class="glyphicon glyphicon-edit"></i></span>
-                        <input class="form-control" type="text" id="address2" name="address2" [(ngModel)]="address2">
+                        <input class="form-control" type="text" id="address2" name="address2" [(ngModel)]="individualDetails.address2">
                       </div>
                     </div>
                   </div>
@@ -604,7 +603,7 @@
                     <div class="col-sm-8">
                       <div class="input-group">
                         <span class="input-group-addon"><i class="glyphicon glyphicon-edit"></i></span>
-                        <input class="form-control" type="text" required="required" name="city" [(ngModel)]="city">
+                        <input class="form-control" type="text" required="required" name="city" [(ngModel)]="individualDetails.city">
                       </div>
                     </div>
                   </div>
@@ -614,7 +613,7 @@
                       <div class="input-group-btn no-padding">
                         <div class="btn-grp">
                           <button type="button" class="btn btn-default dropdown-toggle col-md-12" data-toggle="dropdown">
-                              {{selectedState}} <span class="caret"></span>
+                              {{individualDetails.state}} <span class="caret"></span>
                             </button>
                           <ul class="dropdown-menu scroll_bar col-md-12" role="menu">
                             <li role="menuitem" *ngFor='let state of states_list'>
@@ -632,7 +631,7 @@
                     <div class="col-sm-8">
                       <div class="input-group">
                         <span class="input-group-addon"><i class="glyphicon glyphicon-edit"></i></span>
-                        <input class="form-control" type="text" id="zip" name="zip" required="required" [(ngModel)]="zip">
+                        <input class="form-control" type="text" id="zip" name="zip" required="required" [(ngModel)]="individualDetails.zip">
                       </div>
                     </div>
                   </div>
@@ -641,7 +640,7 @@
                     <div class="col-sm-8">
                       <div class="input-group-btn no-padding">
                         <button type="button" class="btn btn-default dropdown-toggle col-md-12" data-toggle="dropdown">
-                            {{selectedContactType}} <span class="caret"> </span>
+                            {{individualDetails.preferred_contact_method}} <span class="caret"> </span>
                           </button>
                         <ul class="dropdown-menu col-md-12" role="menu">
                           <li role="menuitem"><a class="dropdown-item" (click)="showContactType('Home Phone')">Home Phone</a></li>

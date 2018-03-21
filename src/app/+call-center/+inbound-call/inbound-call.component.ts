@@ -40,16 +40,15 @@ export class InboundCallComponent implements OnInit, OnDestroy {
   private $endCallTime: any;
   private $minutes: any;
   private $seconds: any;
-  private context: any;
   private individualDetails: any = {
     first_name: null,
     middle_name: null,
     last_name: null,
     dob: null,
     gender: null,
-    home_phone: null,
-    work_phone: null,
-    mobile_phone: null,
+    home_phone: '',
+    work_phone: '',
+    mobile_phone: '',
     email: null,
     address1: null,
     address2: null,
@@ -62,7 +61,6 @@ export class InboundCallComponent implements OnInit, OnDestroy {
   private callStatusData: any;
   private callOutComesData: any;
   private selectedContactType: any;
-  private selectedGender: any;
   public selectedState: any;
   private statesList: any;
   private states_list: any;
@@ -73,22 +71,6 @@ export class InboundCallComponent implements OnInit, OnDestroy {
   public _id: any;
   public newData: any;
   public selectedItem: '';
-  public patID: number;
-  private last_name: string;
-  private first_name: string;
-  private middle_name: string;
-  private gender: string;
-  private dob: any;
-  private home_phone: string;
-  private work_phone: string;
-  private mobile_phone: string;
-  private email: string;
-  private address1: string;
-  private address2: string;
-  private zip: string;
-  private city: string;
-  private state: string;
-  private preferred_contact_method: string;
   private _startRecording: boolean;
   private _endRecording: boolean;
   private _endCall: boolean;
@@ -101,6 +83,7 @@ export class InboundCallComponent implements OnInit, OnDestroy {
   public notes: string = '';
   private _callWarning: boolean = true;
   private _warningMessage: string = 'Please start the call first.';
+  private editing: boolean = false
 
   public mask=['(', /[1-9]/, /\d/, /\d/, ')', ' ', /\d/, /\d/, /\d/, '-', /\d/, /\d/, /\d/, /\d/];
 
@@ -166,7 +149,6 @@ export class InboundCallComponent implements OnInit, OnDestroy {
   }
   ngOnDestroy() {
     console.clear();
-    console.log('On Destroy');
   }
   public startCall() {
     this._callWarning = false;
@@ -203,16 +185,12 @@ export class InboundCallComponent implements OnInit, OnDestroy {
       .subscribe(
       (response: any) => {
         this._loadmetrics = true;
-        this.individualDetails = response; // patient details
+        Object.keys(response).forEach(k => {
+          this.individualDetails[k] = response[k]
+        })
         console.log('Patient:',this.individualDetails)
-        this.patID = response.id;
-        this.selectedContactType = this.individualDetails['preferred_contact_method'];
-        this.selectedState = this.individualDetails['state'];
-        this.selectedGender = this.individualDetails['gender'];
-        this.birthdate = this.individualDetails['dob'];
         this.patientAge = this.getPatAge(this.individualDetails['dob']);
         this._addPatients = false;
-        console.log(this.home_phone);
         this.getCalls();
       });
   }
@@ -261,7 +239,7 @@ export class InboundCallComponent implements OnInit, OnDestroy {
       })
   }
   public getCalls() { // TODO get notes for call
-    this._InboundService.getCalls(this.patID)
+    this._InboundService.getCalls(this.individualDetails.id)
       .subscribe((response: any) => {
         this.calls_list = response;
         // console.log('Calls List:',this.calls_list)
@@ -272,7 +250,6 @@ export class InboundCallComponent implements OnInit, OnDestroy {
       })
   }
   public postCalls() {
-    this._id = this.patID;
 
     const postCallData = {
       'call_start_date_time': moment(this.$startCallTime).format('MM/DD/YYYY, hh:mm:ss a'),
@@ -282,105 +259,79 @@ export class InboundCallComponent implements OnInit, OnDestroy {
       'call_outcome_desc': JSON.stringify(this.selectedOutcomes),
       'call_group': JSON.stringify(this.workgroups)
     }
-    console.log(postCallData);
-    this._InboundService.postCallsData(postCallData, this._id);
+    // console.log(postCallData);
+    this._InboundService.postCallsData(postCallData, this.individualDetails.id);
     // this.callBackTimeOut();
   }
   public addPatientList() {
-    this.context = null;
-    this.last_name = '';
-    this.first_name = '';
-    this.middle_name = '';
-    this.home_phone = '';
-    this.work_phone = '';
-    this.mobile_phone = '';
-    this.email = '';
-    this.address1 = '';
-    this.address2 = '';
-    this.zip = '';
-    this.city = '';
-    this.state = '';
-    this.preferred_contact_method = '';
 
     this.form.display = 'none',
-    this.selectedGender = 'Select Gender',
+    // this.selectedGender = 'Select Gender',
     this.selectedContactType = 'Select Preferred Contact';
     this.selectedState = 'Select State';
     this._addPatients = true;
     this._loadmetrics = false;
   }
   public updatePatientsList(obj: any) {
-    this.context = obj;
-    this.last_name = this.context.last_name;
-    this.first_name = this.context.first_name;
-    this.middle_name = this.context.middle_name;
-    this.dob = this.birthdate;
-    this.selectedGender = this.selectedGender;
-    this.home_phone = this.context.home_phone;
-    this.work_phone = this.context.work_phone;
-    this.mobile_phone = this.context.mobile_phone;
-    this.email = this.context.email;
-    this.address1 = this.context.address1;
-    this.address2 = this.context.address2;
-    this.zip = this.context.zip;
-    this.city = this.context.city;
-    this.selectedState = this.selectedState;
-    this.preferred_contact_method = this.preferred_contact_method;
+    this.editing = true;
     this._addPatients = true;
     this._loadmetrics = false;
   }
   public onPatientUpdate() {
-    this._id = this.patID;
-    if (this.context != null) {
+    if (this.editing) {
       const editData = {
-        'last_name': this.last_name.toUpperCase(),
-        'first_name': this.first_name.toUpperCase(),
-        'middle_name': this.middle_name,
+        'last_name': this.individualDetails.last_name.toUpperCase(),
+        'first_name': this.individualDetails.first_name.toUpperCase(),
+        'middle_name': this.individualDetails.middle_name,
         'dob': moment(this.birthdate).format('MM/DD/YYYY'),
-        'gender': this.selectedGender,
-        'home_phone': this.individualDetails.home_phone.replace(/\D/g, ''), // strips formatting on save
-        'work_phone': this.individualDetails.work_phone.replace(/\D/g, ''),
-        'mobile_phone': this.individualDetails.mobile_phone.replace(/\D/g, ''),
-        'email': this.email,
-        'address1': this.address1,
-        'address2': this.address2,
-        'zip': this.zip,
-        'city': this.city,
-        'state': this.selectedState,
+        'gender': this.individualDetails.gender,
+        'email': this.individualDetails.email,
+        'address1': this.individualDetails.address1,
+        'address2': this.individualDetails.address2,
+        'zip': this.individualDetails.zip,
+        'city': this.individualDetails.city,
+        'state': this.individualDetails.state,
         'preferred_contact_method': this.selectedContactType
       }
-      this._InboundService.putPatientDetails(editData, this._id)
+
+      this.individualDetails.home_phone ? editData['home_phone'] = this.individualDetails.home_phone.replace(/\D/g, '') : null; // strips formatting on save
+      this.individualDetails.work_phone ? editData['work_phone'] = this.individualDetails.work_phone.replace(/\D/g, '') : null; // strips formatting on save
+      this.individualDetails.mobile_phone ? editData['mobile_phone'] = this.individualDetails.mobile_phone.replace(/\D/g, '') : null; // strips formatting on save
+
+      this._InboundService.putPatientDetails(editData, this.individualDetails.id)
     } else {
       const newData = {
-        'first_name': this.first_name.toUpperCase(),
-        'middle_name': this.middle_name,
-        'last_name': this.last_name.toUpperCase(),
+        'first_name': this.individualDetails.first_name.toUpperCase(),
+        'middle_name': this.individualDetails.middle_name,
+        'last_name': this.individualDetails.last_name.toUpperCase(),
         'dob': moment(this.birthdate).format('MM/DD/YYYY'),
-        'gender': this.selectedGender,
-        'home_phone': this.individualDetails.home_phone.replace(/\D/g, ''),
-        'work_phone': this.individualDetails.work_phone.replace(/\D/g, ''),
-        'mobile_phone': this.individualDetails.mobile_phone.replace(/\D/g, ''),
-        'email': this.email,
-        'address1': this.address1,
-        'address2': this.address2,
-        'zip': this.zip,
-        'city': this.city,
-        'state': this.selectedState,
-        'preferred_contact_method': this.selectedContactType
+        'gender': this.individualDetails.gender,
+        'email': this.individualDetails.email,
+        'address1': this.individualDetails.address1,
+        'address2': this.individualDetails.address2,
+        'zip': this.individualDetails.zip,
+        'city': this.individualDetails.city,
+        'state': this.individualDetails.state,
+        'preferred_contact_method': this.individualDetails.preferred_contact_method
       }
+
+      this.individualDetails.home_phone ? newData['home_phone'] = this.individualDetails.home_phone.replace(/\D/g, '') : null; // strips formatting on save
+      this.individualDetails.work_phone ? newData['work_phone'] = this.individualDetails.work_phone.replace(/\D/g, '') : null; // strips formatting on save
+      this.individualDetails.mobile_phone ? newData['mobile_phone'] = this.individualDetails.mobile_phone.replace(/\D/g, '') : null; // strips formatting on save
+
       this._InboundService.postNewPatient(newData);
     }
     this._addPatients = false;
-    this.getPatientList();
+    // this.getPatientList();
    // this.saveNotes();
-    this.loadMetrics(this.patID);
+    // this.loadMetrics(this.individualDetails.id);
   }
   public showContactType(contactMethod: any) {
     this.selectedContactType = contactMethod;
   }
-  public showGender(gender: any) {
-    this.selectedGender = gender;
-  }
+  // public showGender(gender: any) {
+  //   this.selectedGender = gender;
+  // }
   public showStatus(status: any) {
     this.selectedItem = status;
   }
